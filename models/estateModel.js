@@ -86,7 +86,7 @@ estateModel.init(
         key: 'id',
       },
     },
-    type_id: {
+    estate_type_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -107,7 +107,7 @@ estateModel.init(
     indexes: [
       {
         unique: true,
-        fields: ["city_id", "type_id", "energy_label_id"],
+        fields: ["city_id", "estate_type_id", "energy_label_id"],
       },
     ],
     sequelize,

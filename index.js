@@ -4,6 +4,8 @@ import { dbcontroller } from "./controllers/dbController.js";
 import { cityController } from "./controllers/cityController.js";
 import { estateTypeController } from "./controllers/estateTypeController.js";
 import { staffController } from "./controllers/staffController.js";
+import { userController } from "./controllers/userController.js";
+import { estateController } from "./controllers/estateController.js";
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.use(dbcontroller);
 app.use(cityController);
 app.use(estateTypeController);
 app.use(staffController);
+app.use(userController);
+app.use(estateController);
 
 app.listen(port, () => {
   console.log(`Server runs at http://localhost:${port}`);
