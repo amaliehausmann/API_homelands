@@ -1,0 +1,28 @@
+{
+  "name": "api_homelands",
+  "version": "1.0.0",
+  "description": "API for homeland website",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amaliehausmann/API_homelands.git"
+  },
+  "author": "Amalie Hausmann",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amaliehausmann/API_homelands/issues"
+  },
+  "homepage": "https://github.com/amaliehausmann/API_homelands#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0",
+    "nodemon": "^3.1.9",
+    "sequelize": "^6.37.5"
+  }
+}
