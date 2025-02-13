@@ -31,6 +31,12 @@ favoriteModel.init(
     },
   },
   {
+    indexes: [
+      {
+        unique: true,
+        fields: ["user_id", "estate_id"],
+      },
+    ],
     sequelize,
     modelName: "favorite",
     underscored: true,

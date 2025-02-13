@@ -3,6 +3,9 @@ import { estateModel } from "../models/estateModel.js";
 import { cityModel } from "../models/cityModel.js";
 import { estateTypeModel } from "../models/estateTypeModel.js";
 import { energyLabelsModel } from "../models/energyLabelsModel.js";
+import { imageModel } from "../models/imageModel.js";
+import { estateImageRelModel } from "../models/estateImageRelModel.js";
+import { Authorize } from "../utils/authUtils.js";
 
 //Opretter en router
 export const estateController = express.Router();
@@ -25,6 +28,10 @@ estateModel.belongsTo(energyLabelsModel, {
   },
 });
 
+estateModel.belongsToMany(imageModel, { through: estateImageRelModel });
+
+imageModel.belongsToMany(estateModel, { through: estateImageRelModel });
+
 cityModel.hasMany(estateModel);
 estateTypeModel.hasMany(estateModel);
 energyLabelsModel.hasMany(estateModel);
@@ -45,6 +52,10 @@ estateController.get("/estates", async (req, res) => {
         {
           model: energyLabelsModel,
           attributes: ["id", "name"],
+        },
+        {
+          model: imageModel,
+          attributes: ["id", "filename", "author", "description"],
         },
       ],
     });
@@ -78,6 +89,10 @@ estateController.get("/estates/:id([0-9]*)", async (req, res) => {
           model: energyLabelsModel,
           attributes: ["id", "name"],
         },
+        {
+          model: imageModel,
+          attributes: ["id", "filename", "author", "description"],
+        },
       ],
     });
 
@@ -94,7 +109,7 @@ estateController.get("/estates/:id([0-9]*)", async (req, res) => {
 });
 
 //CREATE: Route til at oprette
-estateController.post("/estates", async (req, res) => {
+estateController.post("/estates", Authorize, async (req, res) => {
   const {
     address,
     price,
@@ -115,6 +130,7 @@ estateController.post("/estates", async (req, res) => {
     city_id: cityId,
     estate_type_id: typeId,
     energy_label_id: energyLabelId,
+    image_id: imageId,
   } = req.body;
   if (
     !address ||
@@ -135,7 +151,8 @@ estateController.post("/estates", async (req, res) => {
     !num_clicks ||
     !cityId ||
     !typeId ||
-    !energyLabelId
+    !energyLabelId ||
+    !imageId
   ) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
   }
@@ -161,6 +178,7 @@ estateController.post("/estates", async (req, res) => {
       cityId,
       typeId,
       energyLabelId,
+      imageId,
     });
 
     res.status(201).json(data);
@@ -173,7 +191,7 @@ estateController.post("/estates", async (req, res) => {
 });
 
 //UPDATE: Route til at opdatere
-estateController.put("/estates/:id([0-9]*)", async (req, res) => {
+estateController.put("/estates/:id([0-9]*)", Authorize, async (req, res) => {
   const {
     address,
     price,
@@ -194,6 +212,7 @@ estateController.put("/estates/:id([0-9]*)", async (req, res) => {
     city_id: cityId,
     estate_type_id: typeId,
     energy_label_id: energyLabelId,
+    image_id: imageId,
   } = req.body;
 
   const { id } = req.params;
@@ -220,6 +239,7 @@ estateController.put("/estates/:id([0-9]*)", async (req, res) => {
         cityId,
         typeId,
         energyLabelId,
+        imageId,
       },
       { where: { id: id } }
     );
@@ -237,7 +257,7 @@ estateController.put("/estates/:id([0-9]*)", async (req, res) => {
 });
 
 //DELETE: Route til at slette
-estateController.delete("/estates/:id([0-9]*)", async (req, res) => {
+estateController.delete("/estates/:id([0-9]*)", Authorize, async (req, res) => {
   const { id } = req.params;
 
   if (id) {

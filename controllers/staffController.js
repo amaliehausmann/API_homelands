@@ -1,5 +1,6 @@
 import express from "express";
 import { staffModel } from "../models/staffModel.js";
+import { Authorize } from "../utils/authUtils.js";
 
 //Opretter en router
 export const staffController = express.Router();
@@ -40,7 +41,7 @@ staffController.get("/staffs/:id([0-9]*)", async (req, res) => {
 });
 
 //CREATE: Route til at oprette
-staffController.post("/staffs", async (req, res) => {
+staffController.post("/staffs", Authorize, async (req, res) => {
   const { firstname, lastname, position, image, phone, email } = req.body;
   if (!firstname || !lastname || !position || !image || !phone || !email) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
@@ -68,7 +69,7 @@ staffController.post("/staffs", async (req, res) => {
 });
 
 //UPDATE: Route til at opdatere
-staffController.put("/staffs/:id([0-9]*)", async (req, res) => {
+staffController.put("/staffs/:id([0-9]*)", Authorize, async (req, res) => {
   const { firstname, lastname, position, image, phone, email } = req.body;
 
   const { id } = req.params;
@@ -99,7 +100,7 @@ staffController.put("/staffs/:id([0-9]*)", async (req, res) => {
 });
 
 //DELETE: Route til at slette
-staffController.delete("/staffs/:id([0-9]*)", async (req, res) => {
+staffController.delete("/staffs/:id([0-9]*)", Authorize, async (req, res) => {
   const { id } = req.params;
 
   if (id) {

@@ -1,11 +1,12 @@
 import express from "express";
 import { userModel } from "../models/UserModel.js";
+import { Authorize } from "../utils/authUtils.js";
 
 //Opretter en router
 export const userController = express.Router();
 
 //READ: route til at hente liste
-userController.get("/users", async (req, res) => {
+userController.get("/users", Authorize, async (req, res) => {
   try {
     let data = await userModel.findAll();
     if (!data || data.length === 0) {
@@ -19,7 +20,7 @@ userController.get("/users", async (req, res) => {
 });
 
 //READ: Route til at hente detaljer
-userController.get("/users/:id([0-9]*)", async (req, res) => {
+userController.get("/users/:id([0-9]*)", Authorize, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
@@ -76,7 +77,7 @@ userController.post("/users", async (req, res) => {
 });
 
 //UPDATE: Route til at opdatere
-userController.put("/users/:id([0-9]*)", async (req, res) => {
+userController.put("/users/:id([0-9]*)", Authorize, async (req, res) => {
   const { firstname, lastname, email, password, refresh_token, is_active } =
     req.body;
 
@@ -108,7 +109,7 @@ userController.put("/users/:id([0-9]*)", async (req, res) => {
 });
 
 //DELETE: Route til at slette
-userController.delete("/users/:id([0-9]*)", async (req, res) => {
+userController.delete("/users/:id([0-9]*)", Authorize, async (req, res) => {
   const { id } = req.params;
 
   if (id) {

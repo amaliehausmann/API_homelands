@@ -6,6 +6,9 @@ import { estateTypeController } from "./controllers/estateTypeController.js";
 import { staffController } from "./controllers/staffController.js";
 import { userController } from "./controllers/userController.js";
 import { estateController } from "./controllers/estateController.js";
+import { favoritesController } from "./controllers/favoritesController.js";
+import { reviewController } from "./controllers/reviewController.js";
+import { authController } from "./controllers/authController.js";
 
 dotenv.config();
 
@@ -26,6 +29,9 @@ app.use(estateTypeController);
 app.use(staffController);
 app.use(userController);
 app.use(estateController);
+app.use(favoritesController);
+app.use(reviewController);
+app.use(authController);
 
 app.listen(port, () => {
   console.log(`Server runs at http://localhost:${port}`);

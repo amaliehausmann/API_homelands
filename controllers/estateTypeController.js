@@ -1,5 +1,6 @@
 import express from "express";
 import { estateTypeModel } from "../models/estateTypeModel.js";
+import { Authorize } from "../utils/authUtils.js";
 
 //Opretter en router
 export const estateTypeController = express.Router();
@@ -40,7 +41,7 @@ estateTypeController.get("/estate_types/:id([0-9]*)", async (req, res) => {
 });
 
 //CREATE: Route til at oprette
-estateTypeController.post("/estate_types", async (req, res) => {
+estateTypeController.post("/estate_types", Authorize, async (req, res) => {
   const { name } = req.body;
   if (!name) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
@@ -61,7 +62,7 @@ estateTypeController.post("/estate_types", async (req, res) => {
 });
 
 //UPDATE: Route til at opdatere
-estateTypeController.put("/estate_types/:id([0-9]*)", async (req, res) => {
+estateTypeController.put("/estate_types/:id([0-9]*)", Authorize, async (req, res) => {
   const { name } = req.body;
 
   const { id } = req.params;
@@ -87,7 +88,7 @@ estateTypeController.put("/estate_types/:id([0-9]*)", async (req, res) => {
 });
 
 //DELETE: Route til at slette
-estateTypeController.delete("/estate_types/:id([0-9]*)", async (req, res) => {
+estateTypeController.delete("/estate_types/:id([0-9]*)", Authorize, async (req, res) => {
   const { id } = req.params;
 
   if (id) {

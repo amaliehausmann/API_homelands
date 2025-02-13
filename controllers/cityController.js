@@ -1,5 +1,6 @@
 import express from "express";
 import { cityModel } from "../models/cityModel.js";
+import { Authorize } from "../utils/authUtils.js";
 
 //Opretter en router
 export const cityController = express.Router();
@@ -40,7 +41,7 @@ cityController.get("/cities/:id([0-9]*)", async (req, res) => {
 });
 
 //CREATE: Route til at oprette
-cityController.post("/cities", async (req, res) => {
+cityController.post("/cities", Authorize, async (req, res) => {
   const { zipcode, name } = req.body;
   if (!zipcode || !name) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
@@ -62,7 +63,7 @@ cityController.post("/cities", async (req, res) => {
 });
 
 //UPDATE: Route til at opdatere
-cityController.put("/cities/:id([0-9]*)", async (req, res) => {
+cityController.put("/cities/:id([0-9]*)", Authorize, async (req, res) => {
   const { zipcode, name } = req.body;
 
   const { id } = req.params;
@@ -89,7 +90,7 @@ cityController.put("/cities/:id([0-9]*)", async (req, res) => {
 });
 
 //DELETE: Route til at slette
-cityController.delete("/cities/:id([0-9]*)", async (req, res) => {
+cityController.delete("/cities/:id([0-9]*)", Authorize, async (req, res) => {
   const { id } = req.params;
 
   if (id) {
