@@ -55,6 +55,13 @@ userModel.init(
   }
 );
 
+userModel.addHook('beforeBulkCreate', async (users) => {
+  // Krypter hver adgangskode før bulkCreate-operationen
+  for (const user of users) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+});
+
 const createHash = async (string) => {
   const salt = await bcrypt.genSalt(10);
   const hashedString = await bcrypt.hash(string, salt);

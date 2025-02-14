@@ -3,9 +3,18 @@ import { favoriteModel } from "../models/favoriteModel.js";
 import { userModel } from "../models/userModel.js";
 import { estateModel } from "../models/estateModel.js";
 import { Authorize } from "../utils/authUtils.js";
+import { imageModel } from "../models/imageModel.js";
+import { estateImageRelModel } from "../models/estateImageRelModel.js";
 
 //Opretter en router
 export const favoritesController = express.Router();
+
+estateModel.belongsToMany(imageModel, { through: estateImageRelModel });
+imageModel.belongsToMany(estateModel, { through: estateImageRelModel });
+
+estateModel.belongsToMany(userModel, { through: favoriteModel });
+userModel.belongsToMany(estateModel, { through: favoriteModel });
+
 favoriteModel.belongsTo(userModel, {
   foreignKey: {
     allowNull: false,
@@ -17,118 +26,84 @@ favoriteModel.belongsTo(estateModel, {
   },
 });
 
-estateModel.hasMany(favoriteModel);
-userModel.hasMany(favoriteModel);
+//READ: Route til at hente liste af favorites baseret på user_id
+favoritesController.get(
+  "/favorites/:user_id([0-9]*)",
+  Authorize,
+  async (req, res) => {
+    try {
+      const user_id = parseInt(req.params.user_id, 10);
 
-//READ: route til at hente liste
-favoritesController.get("/favorites", Authorize, async (req, res) => {
-  try {
-    let data = await favoriteModel.findAll({
-      include: [
-        {
-          model: userModel,
-          attributes: ["id", "firstname", "lastname", "email"],
-        },
-        {
-          model: estateModel,
-          attributes: [
-            "id",
-            "address",
-            "price",
-            "payout",
-            "gross",
-            "net",
-            "cost",
-            "num_rooms",
-            "num_floors",
-            "floor_space",
-            "ground_space",
-            "basement_space",
-            "year_of_construction",
-            "year_rebuilt",
-            "description",
-            "floorplan",
-            "num_clicks",
-            "city_id",
-            "estate_type_id",
-            "energy_label_id",
-          ],
-        },
-      ],
-    });
-    if (!data || data.length === 0) {
-      return res.status(404).json({ message: "Ingen data fundet" });
+      const data = await favoriteModel.findAll({
+        where: { user_id: user_id },
+        include: [
+          {
+            model: userModel,
+            attributes: ["id", "firstname", "lastname", "email"],
+          },
+          {
+            model: estateModel,
+            attributes: [
+              "id",
+              "address",
+              "price",
+              "payout",
+              "gross",
+              "net",
+              "cost",
+              "num_rooms",
+              "num_floors",
+              "floor_space",
+              "ground_space",
+              "basement_space",
+              "year_of_construction",
+              "year_rebuilt",
+              "description",
+              "floorplan",
+              "num_clicks",
+              "city_id",
+              "estate_type_id",
+              "energy_label_id",
+            ],
+            include: [
+              {
+                model: imageModel,
+                attributes: ["id", "filename", "description", "author"],
+                required: false, 
+              },
+            ],
+          },
+        ],
+      });
+      
+
+      if (!data) {
+        return res.status(404).json({ message: "Item ikke fundet" });
+      }
+
+      res.json(data);
+    } catch (error) {
+      res.status(500).send({
+        message: `Fejl i kald af model: ${error.message}`,
+      });
     }
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).send({ message: `Fejl i kald af model: ${error.message}` });
   }
-});
-
-//READ: Route til at hente detaljer
-favoritesController.get("/favorites/:id([0-9]*)", Authorize, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-
-    let data = await favoriteModel.findOne({
-      where: { id: id },
-      include: [
-        {
-          model: userModel,
-          attributes: ["id", "firstname", "lastname", "email"],
-        },
-        {
-          model: estateModel,
-          attributes: [
-            "id",
-            "address",
-            "price",
-            "payout",
-            "gross",
-            "net",
-            "cost",
-            "num_rooms",
-            "num_floors",
-            "floor_space",
-            "ground_space",
-            "basement_space",
-            "year_of_construction",
-            "year_rebuilt",
-            "description",
-            "floorplan",
-            "num_clicks",
-            "city_id",
-            "estate_type_id",
-            "energy_label_id",
-          ],
-        },
-      ],
-    });
-
-    if (!data) {
-      return res.status(404).json({ message: "Item ikke fundet" });
-    }
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).send({
-      message: `Fejl i kald af model: ${error.message}`,
-    });
-  }
-});
+);
 
 //CREATE: Route til at oprette
 favoritesController.post("/favorites", Authorize, async (req, res) => {
-  const { user_id: userId, estate_id: estateId } = req.body;
-  if (!userId || !estateId) {
+  const { user_id, estate_id } = req.body; 
+  
+  console.log(req.body); 
+
+  if (!user_id || !estate_id) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
   }
 
   try {
     const data = await favoriteModel.create({
-      userId,
-      estateId,
+      user_id, 
+      estate_id,
     });
 
     res.status(201).json(data);
@@ -140,54 +115,32 @@ favoritesController.post("/favorites", Authorize, async (req, res) => {
   }
 });
 
-//UPDATE: Route til at opdatere
-favoritesController.put("/favorites/:id([0-9]*)", Authorize, async (req, res) => {
-  const { estate_id: estateId, user_id: userId } = req.body;
-
-  const { id } = req.params;
-
-  try {
-    const data = await favoriteModel.update(
-      {
-        estateId,
-        userId,
-      },
-      { where: { id: id } }
-    );
-
-    if (data[0] > 0) {
-      res.status(200).send({ message: "Item opdateret succesfuldt" });
-    } else {
-      res.status(404).send({ message: "Item ikke fundet" });
-    }
-  } catch (error) {
-    res.status(500).send({
-      message: `Fejl ved opdatering af model: ${error.message}`,
-    });
-  }
-});
 
 //DELETE: Route til at slette
-favoritesController.delete("/favorites/:id([0-9]*)", Authorize, async (req, res) => {
-  const { id } = req.params;
+favoritesController.delete(
+  "/favorites/:id([0-9]*)",
+  Authorize,
+  async (req, res) => {
+    const { id } = req.params;
 
-  if (id) {
-    try {
-      await favoriteModel.destroy({
-        where: { id: id },
-      });
+    if (id) {
+      try {
+        await favoriteModel.destroy({
+          where: { id: id },
+        });
 
-      res.status(200).send({
-        message: "Rækken er slettet",
-      });
-    } catch (error) {
-      res.status(500).send({
-        message: `Kunne ikke slette item: ${error.message}`,
+        res.status(200).send({
+          message: "Rækken er slettet",
+        });
+      } catch (error) {
+        res.status(500).send({
+          message: `Kunne ikke slette item: ${error.message}`,
+        });
+      }
+    } else {
+      res.status(400).send({
+        message: "Id er ugyldigt",
       });
     }
-  } else {
-    res.status(400).send({
-      message: "Id er ugyldigt",
-    });
   }
-});
+);

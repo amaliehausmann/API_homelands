@@ -10,23 +10,12 @@ import { Authorize } from "../utils/authUtils.js";
 //Opretter en router
 export const estateController = express.Router();
 
-estateModel.belongsTo(cityModel, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
 
-estateModel.belongsTo(estateTypeModel, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
+estateModel.belongsTo(cityModel);
 
-estateModel.belongsTo(energyLabelsModel, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
+estateModel.belongsTo(estateTypeModel);
+
+estateModel.belongsTo(energyLabelsModel);
 
 estateModel.belongsToMany(imageModel, { through: estateImageRelModel });
 
@@ -127,11 +116,12 @@ estateController.post("/estates", Authorize, async (req, res) => {
     description,
     floorplan,
     num_clicks,
-    city_id: cityId,
-    estate_type_id: typeId,
-    energy_label_id: energyLabelId,
-    image_id: imageId,
+    city_id,
+    estate_type_id,
+    energy_label_id,
   } = req.body;
+
+  console.log(req.body);
   if (
     !address ||
     !price ||
@@ -149,10 +139,9 @@ estateController.post("/estates", Authorize, async (req, res) => {
     !description ||
     !floorplan ||
     !num_clicks ||
-    !cityId ||
-    !typeId ||
-    !energyLabelId ||
-    !imageId
+    !city_id ||
+    !estate_type_id ||
+    !energy_label_id
   ) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
   }
@@ -175,10 +164,9 @@ estateController.post("/estates", Authorize, async (req, res) => {
       description,
       floorplan,
       num_clicks,
-      cityId,
-      typeId,
-      energyLabelId,
-      imageId,
+      city_id,
+      estate_type_id,
+      energy_label_id,
     });
 
     res.status(201).json(data);
@@ -209,10 +197,9 @@ estateController.put("/estates/:id([0-9]*)", Authorize, async (req, res) => {
     description,
     floorplan,
     num_clicks,
-    city_id: cityId,
-    estate_type_id: typeId,
-    energy_label_id: energyLabelId,
-    image_id: imageId,
+    city_id,
+    estate_type_id,
+    energy_label_id,
   } = req.body;
 
   const { id } = req.params;
@@ -236,10 +223,9 @@ estateController.put("/estates/:id([0-9]*)", Authorize, async (req, res) => {
         description,
         floorplan,
         num_clicks,
-        cityId,
-        typeId,
-        energyLabelId,
-        imageId,
+        city_id,
+        estate_type_id,
+        energy_label_id,
       },
       { where: { id: id } }
     );

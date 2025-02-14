@@ -7,16 +7,8 @@ import { Authorize } from "../utils/authUtils.js";
 //Opretter en router
 export const reviewController = express.Router();
 
-reviewModel.belongsTo(userModel, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
-reviewModel.belongsTo(estateModel, {
-  foreignKey: {
-    allowNull: false,
-  },
-});
+reviewModel.belongsTo(userModel);
+reviewModel.belongsTo(estateModel);
 
 estateModel.hasMany(reviewModel);
 userModel.hasMany(reviewModel);
@@ -68,12 +60,12 @@ reviewController.get("/reviews", async (req, res) => {
 });
 
 //READ: Route til at hente detaljer
-reviewController.get("/reviews/:id([0-9]*)", async (req, res) => {
+reviewController.get("/reviews/:estate_id([0-9]*)", async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const estate_id = parseInt(req.params.estate_id, 10);
 
-    let data = await reviewModel.findOne({
-      where: { id: id },
+    let data = await reviewModel.findAll({
+      where: { estate_id: estate_id },
       include: [
         {
           model: userModel,
@@ -121,23 +113,24 @@ reviewController.get("/reviews/:id([0-9]*)", async (req, res) => {
 
 //CREATE: Route til at oprette
 reviewController.post("/reviews", Authorize, async (req, res) => {
-  const {
-    user_id: userId,
-    estate_id: estateId,
-    subject,
-    comment,
-    num_stars,
-    date,
-    is_active,
-  } = req.body;
-  if (!userId || !estateId) {
+  const { user_id, estate_id, subject, comment, num_stars, date, is_active } =
+    req.body;
+  if (
+    !user_id ||
+    !estate_id ||
+    !subject ||
+    !comment ||
+    !num_stars ||
+    !date ||
+    !is_active
+  ) {
     return res.status(400).json({ message: "Alle felter skal sendes med" });
   }
 
   try {
     const data = await reviewModel.create({
-      userId,
-      estateId,
+      user_id,
+      estate_id,
       subject,
       comment,
       num_stars,
