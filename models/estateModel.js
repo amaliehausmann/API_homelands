@@ -106,7 +106,6 @@ estateModel.init(
   {
     indexes: [
       {
-        unique: true,
         fields: ["city_id", "estate_type_id", "energy_label_id"],
       },
     ],
